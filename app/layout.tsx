@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: 'rSearch',
     images: [
       {
-        url: '/og.png',
+        url: 'https://rsearch.app/og-image.png', // Using absolute URL
         width: 1200,
         height: 630,
         alt: 'rSearch - AI-Powered Research Assistant'
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     description: 'Discover Insights, Not Just Results. AI-powered reasoning engine that thinks just like you do.',
     creator: '@justmalhar',
     site: '@justmalhar',
-    images: ['/og.png'],
+    images: ['https://rsearch.app/og-image.png'], // Using absolute URL
   },
   icons: {
     icon: {
@@ -59,7 +59,44 @@ export const metadata: Metadata = {
       type: "image/svg+xml"
     },
     shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180'
+      },
+      {
+        url: '/apple-touch-icon-57x57.png',
+        sizes: '57x57'
+      },
+      {
+        url: '/apple-touch-icon-72x72.png',
+        sizes: '72x72'
+      },
+      {
+        url: '/apple-touch-icon-76x76.png',
+        sizes: '76x76'
+      },
+      {
+        url: '/apple-touch-icon-114x114.png',
+        sizes: '114x114'
+      },
+      {
+        url: '/apple-touch-icon-120x120.png',
+        sizes: '120x120'
+      },
+      {
+        url: '/apple-touch-icon-144x144.png',
+        sizes: '144x144'
+      },
+      {
+        url: '/apple-touch-icon-152x152.png',
+        sizes: '152x152'
+      },
+      {
+        url: '/apple-touch-icon-180x180.png',
+        sizes: '180x180'
+      }
+    ],
   },
   category: 'technology',
 };
@@ -71,27 +108,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        {/* Twitter Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@justmalhar" />
-        <meta name="twitter:creator" content="@justmalhar" />
-        <meta name="twitter:title" content="rSearch: AI-Powered Research Assistant" />
-        <meta name="twitter:description" content="Discover Insights, Not Just Results. AI-powered reasoning engine that thinks just like you do." />
-        <meta name="twitter:image" content="/og.png" />
-
-        {/* Open Graph Meta Tags */}
-        <meta property="og:title" content="rSearch: AI-Powered Reasoning Engine" />
-        <meta property="og:description" content="Discover Insights, Not Just Results. AI-powered reasoning engine that thinks just like you do." />
-        <meta property="og:image" content="/og.png" />
-        <meta property="og:url" content="https://rsearch.app" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="rSearch" />
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:logo" content="/logo.png" />
-      </head>
+      <head />
       <body className={inter.className}>
         <div className="min-h-screen bg-white flex">
           <Sidebar />

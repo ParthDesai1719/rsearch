@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Skeleton } from "@/components/ui/skeleton";
 import Query from '@/components/rSearch/query';
@@ -251,6 +252,44 @@ function SearchPageContent() {
     fetchAiResponse();
     return () => { isMounted = false };
   }, [sources, searchTerm, mode, knowledgeGraph, refinedQuery]);
+
+  // Save search results to Supabase when AI response is complete
+  useEffect(() => {
+    const saveSearchResults = async () => {
+      if (!isAiComplete || !searchTerm || !aiResponse) return;
+
+      try {
+        const { error } = await supabase
+          .from('search_results')
+          .insert({
+            searchTerm,
+            mode,
+            refinedQuery: refinedQuery?.query,
+            refinedQueryExplanation: refinedQuery?.explanation,
+            sources: sources,
+            knowledgeGraph: knowledgeGraph || null,
+            reasoningContent,
+            aiResponse,
+            rawSources: rawSources || null,
+            metadata: {
+              isSourcesExpanded,
+              isRefinedQueryExpanded,
+              isThinkingExpanded,
+              isResultsExpanded
+            },
+            publishArticle: true
+          });
+
+        if (error) {
+          console.error('Error saving search results:', error);
+        }
+      } catch (err) {
+        console.error('Error saving to Supabase:', err);
+      }
+    };
+
+    saveSearchResults();
+  }, [isAiComplete, searchTerm, mode, refinedQuery, sources, knowledgeGraph, reasoningContent, aiResponse, rawSources, isSourcesExpanded, isRefinedQueryExpanded, isThinkingExpanded, isResultsExpanded]);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
