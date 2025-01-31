@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { 
   Search, Globe, BookText, Video, 
   Zap, ShoppingBag, MapPin, 
-  Newspaper, GraduationCap, Lightbulb 
+  Newspaper, GraduationCap, Lightbulb,
+  Wand2
 } from "lucide-react";
 import { SearchSource } from "@/types/search";
 import {
@@ -36,6 +37,7 @@ export default function Home() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [enableQueryRefinement, setEnableQueryRefinement] = useState(true);
 
   // Initialize default settings if they don't exist
   useEffect(() => {
@@ -44,11 +46,27 @@ export default function Home() {
       const defaultSettings = {
         aiProvider: "deepseek",
         searchProvider: "serper",
-        autoExpandSections: true
+        autoExpandSections: true,
+        enableQueryRefinement: true
       };
       localStorage.setItem("rSearch_settings", JSON.stringify(defaultSettings));
+    } else {
+      const settings = JSON.parse(savedSettings);
+      setEnableQueryRefinement(settings.enableQueryRefinement ?? true);
     }
   }, []);
+
+  // Update settings when toggle changes
+  const handleQueryRefinementToggle = () => {
+    const newValue = !enableQueryRefinement;
+    setEnableQueryRefinement(newValue);
+    const savedSettings = localStorage.getItem("rSearch_settings");
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      settings.enableQueryRefinement = newValue;
+      localStorage.setItem("rSearch_settings", JSON.stringify(settings));
+    }
+  };
 
   const searchModes = [
     {
@@ -104,7 +122,7 @@ export default function Home() {
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
     
-    router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}`);
+    router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}&refine=${enableQueryRefinement}`);
   };
 
   return (
@@ -165,7 +183,18 @@ export default function Home() {
 
               {/* Controls Row */}
               <div className="flex items-center justify-between px-2">
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleQueryRefinementToggle}
+                    className={`text-orange-500 hover:bg-orange-100 hover:text-orange-700 flex gap-2 border border-orange-200/50 ${
+                      enableQueryRefinement ? 'bg-orange-50 border-orange-300' : ''
+                    }`}
+                  >
+                    <Wand2 className="h-4 w-4" />
+                    Improve Query
+                  </Button>
                   {isDesktop ? (
                     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} >
                       <DropdownMenuTrigger asChild>
