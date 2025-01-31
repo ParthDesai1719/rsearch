@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: 'rSearch',
     images: [
       {
-        url: 'https://rsearch.app/og-image.png', // Using absolute URL
+        url: 'https://rsearch.app/og.png', // Using absolute URL
         width: 1200,
         height: 630,
         alt: 'rSearch - AI-Powered Research Assistant'
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     description: 'Discover Insights, Not Just Results. AI-powered reasoning engine that thinks just like you do.',
     creator: '@justmalhar',
     site: '@justmalhar',
-    images: ['https://rsearch.app/og-image.png'], // Using absolute URL
+    images: ['https://rsearch.app/og.png'], // Using absolute URL
   },
   icons: {
     icon: {
