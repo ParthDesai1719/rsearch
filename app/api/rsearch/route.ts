@@ -151,7 +151,7 @@ ${video.date ? `Date: ${video.date}\n` : ''}${video.duration ? `Duration: ${vide
     const response = await openai.chat.completions.create({
       model: model as string,  // Make sure to use the correct model name
       messages: [
-        { role: "system", content: prompt },
+        { role: "user", content: prompt },
         { role: 'user', content: searchTerm }
       ],
       stream: true,
