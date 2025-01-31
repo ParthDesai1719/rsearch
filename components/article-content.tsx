@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from '@/hooks/use-media-query';
 import Query from '@/components/rSearch/query';
 import Thinking from '@/components/rSearch/thinking';
@@ -55,7 +56,7 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
 
   return (
     <div className="flex min-h-screen">
-      <main className={`flex-1 p-4 md:p-8 ${!isMobile ? 'pl-32' : ''} max-w-7xl mx-auto space-y-6 md:space-y-8`}>
+      <div className={`flex-1 p-4 md:p-8 ${!isMobile ? 'pl-32' : ''} max-w-7xl mx-auto space-y-6 md:space-y-8`}>
         {/* 1. Query */}
         <Query searchTerm={initialData.searchTerm} mode={initialData.mode as SearchSource} />
 
@@ -79,7 +80,12 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          {isRefinedQueryExpanded && initialData.refinedQuery && (
+          {!initialData.refinedQuery ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-2/3" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : isRefinedQueryExpanded && initialData.refinedQuery && (
             <div className="space-y-2">
               <p className="text-orange-800">{initialData.refinedQuery}</p>
               <p className="text-sm text-orange-700 mt-2">{initialData.refinedQueryExplanation}</p>
@@ -107,7 +113,13 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          {isSourcesExpanded && initialData.sources && (
+          {!initialData.sources ? (
+            <div className="space-y-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : isSourcesExpanded && initialData.sources && (
             <Sources
               sources={initialData.sources}
               mode={initialData.mode as SearchSource}
@@ -175,16 +187,22 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
             />
           )}
         </section>
-      </main>
-      <aside>
-        {!isMobile && initialData.sources && (
-          <SourcesSidebar 
-            showSidebar={showSourcesSidebar}
-            sources={initialData.sources}
-            getWebsiteName={getWebsiteName}
-          />
-        )}
-      </aside>
+      </div>
+      {!isMobile && initialData.sources && (
+        <SourcesSidebar 
+          showSidebar={showSourcesSidebar}
+          sources={initialData.sources}
+          getWebsiteName={getWebsiteName}
+        />
+      )}
     </div>
+  );
+}
+
+export function ArticleContentWrapper({ initialData }: ArticleContentProps) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FFFAF5] p-4 md:p-8">Loading...</div>}>
+      <ArticleContent initialData={initialData} />
+    </Suspense>
   );
 }

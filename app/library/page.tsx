@@ -80,7 +80,8 @@ export default function LibraryPage() {
   }, []);
 
   const handleCardClick = (item: SearchResult) => {
-    router.push(`/article/?q=${encodeURIComponent(item.searchTerm)}&mode=${item.mode.toLowerCase()}`);
+    const slug = `${item.searchTerm}-${item.mode}`.toLowerCase().replace(/\s+/g, '-');
+    router.push(`/articles/${encodeURIComponent(slug)}`);
   };
 
   const getIconForMode = (mode: string) => {

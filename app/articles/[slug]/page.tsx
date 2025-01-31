@@ -21,14 +21,12 @@ export async function generateStaticParams() {
   })) || [];
 }
 
-// Generate metadata for each article
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  // Extract searchTerm and mode from slug
-  const parts = decodeURIComponent(params.slug).split('-');
+// Helper function to extract search params and fetch data
+async function getArticleDataFromSlug(slug: string) {
+  const parts = decodeURIComponent(slug).split('-');
   const mode = parts.pop() || '';
   const searchTerm = parts.join(' ');
 
-  // Fetch article data
   const { data: article } = await supabase
     .from('search_results')
     .select('*')
@@ -36,6 +34,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     .eq('mode', mode)
     .eq('publishArticle', true)
     .single();
+  
+  return { article, searchTerm, mode };
+}
+
+// Generate metadata for each article
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { article } = await getArticleDataFromSlug(resolvedParams.slug);
 
   if (!article) {
     return {
@@ -72,20 +78,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 // Page component
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  // Extract searchTerm and mode from slug
-  const parts = decodeURIComponent(params.slug).split('-');
-  const mode = parts.pop() || '';
-  const searchTerm = parts.join(' ');
-
-  // Fetch article data
-  const { data: article } = await supabase
-    .from('search_results')
-    .select('*')
-    .eq('searchTerm', searchTerm)
-    .eq('mode', mode)
-    .eq('publishArticle', true)
-    .single();
+export default async function ArticlePage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  const resolvedParams = await params;
+  const { article } = await getArticleDataFromSlug(resolvedParams.slug);
 
   if (!article) {
     notFound();

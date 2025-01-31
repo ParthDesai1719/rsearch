@@ -248,7 +248,8 @@ function SearchPageContent() {
               isRefinedQueryExpanded,
               isThinkingExpanded,
               isResultsExpanded
-            }
+            },
+            publishArticle: true
           });
 
         if (error) {
