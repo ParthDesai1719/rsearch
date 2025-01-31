@@ -264,8 +264,8 @@ function SearchPageContent() {
           .insert({
             searchTerm,
             mode,
-            refinedQuery: refinedQuery?.query,
-            refinedQueryExplanation: refinedQuery?.explanation,
+            refinedQuery: refinedQuery?.query || null,
+            refinedQueryExplanation: refinedQuery?.explanation || null,
             sources: sources,
             knowledgeGraph: knowledgeGraph || null,
             reasoningContent,

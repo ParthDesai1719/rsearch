@@ -61,7 +61,7 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
         <Query searchTerm={initialData.searchTerm} mode={initialData.mode as SearchSource} />
 
         {/* 2. Query Refinement */}
-        <section className="space-y-4">
+        {initialData.refinedQuery && <section className="space-y-4">
           <button
             type="button"
             onClick={() => setIsRefinedQueryExpanded(!isRefinedQueryExpanded)}
@@ -91,10 +91,10 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
               <p className="text-sm text-orange-700 mt-2">{initialData.refinedQueryExplanation}</p>
             </div>
           )}
-        </section>
+        </section>}
 
         {/* 3. Sources */}
-        <section className="space-y-4">
+        {initialData.sources && <section className="space-y-4">
           <button
             type="button"
             onClick={() => setIsSourcesExpanded(!isSourcesExpanded)}
@@ -129,7 +129,7 @@ export default function ArticleContent({ initialData }: ArticleContentProps) {
               knowledgeGraph={initialData.knowledgeGraph}
             />
           )}
-        </section>
+        </section>}
 
         {/* 4. Thinking */}
         {initialData.reasoningContent && <section>
