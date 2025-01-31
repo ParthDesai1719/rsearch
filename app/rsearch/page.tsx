@@ -17,6 +17,7 @@ function SearchPageContent() {
   const params = useSearchParams();
   const searchTerm = params.get('q') || '';
   const mode = (params.get('mode') || '') as SearchSource;
+  const shouldRefine = params.get('refine') !== 'false'; // Default to true if not specified
 
   // 2. Query refinement state
   const [isRefining, setIsRefining] = useState(true);
@@ -61,36 +62,59 @@ function SearchPageContent() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchResults = async () => {
+    const fetchRefinedQuery = async () => {
       if (!searchTerm) return;
 
       try {
-        // Step 2: Refine Query
-        setIsRefining(true);
-        const refinementRes = await fetch('/api/query', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ searchTerm, mode })
-        });
-
-        if (!refinementRes.ok) throw new Error('Failed to refine query');
-        
-        const refinementData = await refinementRes.json();
-        if (isMounted) {
-          setRefinedQuery({
-            query: refinementData.refined_query,
-            explanation: refinementData.explanation
+        // Step 2: Refine Query (if enabled)
+        if (shouldRefine) {
+          setIsRefining(true);
+          const refinementRes = await fetch('/api/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ searchTerm, mode })
           });
+
+          if (!refinementRes.ok) throw new Error('Failed to refine query');
+          
+          const refinementData = await refinementRes.json();
+          if (isMounted) {
+            setRefinedQuery({
+              query: refinementData.refined_query,
+              explanation: refinementData.explanation
+            });
+            setIsRefining(false);
+          }
+        } else {
+          setIsRefining(false);
+          setRefinedQuery(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
           setIsRefining(false);
         }
+      }
+    };
 
-        // Step 3: Fetch Sources
+    fetchRefinedQuery();
+    return () => { isMounted = false };
+  }, [searchTerm, mode, shouldRefine]);
+
+  // Separate effect for fetching search results
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSearchResults = async () => {
+      if (!searchTerm) return;
+
+      try {
         setIsLoadingSources(true);
         const searchRes = await fetch('/api/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json'},
           body: JSON.stringify({ 
-            q: searchTerm,
+            q: shouldRefine && refinedQuery ? refinedQuery.query : searchTerm,
             mode 
           })
         });
@@ -133,15 +157,19 @@ function SearchPageContent() {
       } catch (err) {
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'An error occurred');
-          setIsRefining(false);
           setIsLoadingSources(false);
         }
       }
     };
 
-    fetchResults();
+    // Only fetch search results when we have the refined query (if refinement is enabled)
+    // or immediately if refinement is disabled
+    if (!shouldRefine || refinedQuery !== null) {
+      fetchSearchResults();
+    }
+
     return () => { isMounted = false };
-  }, [searchTerm, mode]);
+  }, [searchTerm, mode, shouldRefine, refinedQuery]);
 
   // Separate effect for AI response
   useEffect(() => {
@@ -233,11 +261,12 @@ function SearchPageContent() {
         <Query searchTerm={searchTerm} mode={mode} />
 
         {/* 2. Query Refinement */}
-        <section className="space-y-4">
-          <button
-            type="button"
-            onClick={() => setIsRefinedQueryExpanded(!isRefinedQueryExpanded)}
-            className="flex items-center gap-2 text-xl md:text-2xl font-medium text-orange-600"
+        {shouldRefine && (
+          <section className="space-y-4">
+            <button
+              type="button"
+              onClick={() => setIsRefinedQueryExpanded(!isRefinedQueryExpanded)}
+              className="flex items-center gap-2 text-xl md:text-2xl font-medium text-orange-600"
           >
             <span>Refined Query</span>
             <svg
@@ -262,8 +291,9 @@ function SearchPageContent() {
               <p className="text-orange-800">{refinedQuery.query}</p>
               <p className="text-sm text-orange-700 mt-2">{refinedQuery.explanation}</p>
             </div>
-          )}
-        </section>
+            )}
+          </section>
+        )}
 
         {/* 3. Sources */}
         <section className="space-y-4">
