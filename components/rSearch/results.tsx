@@ -296,7 +296,15 @@ export default function Results({
                               <div className="relative flex-none">
                                 <div className="relative overflow-hidden rounded-full">
                                   <img
-                                    src={`https://www.google.com/s2/favicons?sz=128&domain=${new URL(item.link).hostname}`}
+                                    src={(() => {
+                                      try {
+                                        const url = new URL(item.link);
+                                        return `https://www.google.com/s2/favicons?sz=128&domain=${url.hostname}`;
+                                      } catch {
+                                        // Return a default favicon if URL is invalid
+                                        return '/globe.svg';
+                                      }
+                                    })()}
                                     alt={`Favicon for ${getWebsiteName(item.link)}`}
                                     width="16"
                                     height="16"
