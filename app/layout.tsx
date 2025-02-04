@@ -4,7 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileHeader } from "@/components/ui/mobile-header";
 import { Analytics } from '@vercel/analytics/next';
-
+import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "rSearch: AI-Powered Reasoning Engine",
@@ -120,6 +120,7 @@ export default function RootLayout({
           </div>
         </div>
         <Analytics />
+        <Toaster />
       </body>
     </html>
   );

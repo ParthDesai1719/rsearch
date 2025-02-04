@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
 import Markdown from 'react-markdown';
+import { useToast } from "@/hooks/use-toast"
+
 // Image component with error handling
 const ImageWithFallback = ({ ...props }: ImgHTMLAttributes<HTMLImageElement>) => {
   const [hasError, setHasError] = useState(false);
@@ -51,6 +53,8 @@ export default function Results({
   generateSearchId,
   getWebsiteName
 }: ResultsProps) {
+  const { toast } = useToast()
+
   return (
     <div className="w-full">
       <div className="prose prose-orange max-w-none space-y-8 overflow-x-hidden w-full max-w-[95vw] md:max-w-full">
@@ -212,6 +216,9 @@ export default function Results({
                     em: ({...props}) => (
                       <em {...props} className="italic text-orange-600/90 font-semibold" />
                     ),
+                    pre: ({...props}) => (
+                      <pre {...props} className="bg-orange-50 text-orange-600 rounded px-1.5 py-0.5 text-sm font-mono" />
+                    ),
                     code: ({...props}) => (
                       <code {...props} className="bg-orange-50 text-orange-600 rounded px-1.5 py-0.5 text-sm font-mono" />
                     ),
@@ -276,6 +283,40 @@ export default function Results({
                   >
                     <title>Download markdown</title>
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url);
+                    toast({
+                      title: "Link copied!",
+                      description: "URL has been copied to clipboard",
+                      duration: 2000,
+                    });
+                  }}
+                  className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  aria-label="Share article"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none" 
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    role="img"
+                  >
+                    <title>Share article</title>
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
                   </svg>
                 </button>
               </div>
