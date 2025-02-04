@@ -105,8 +105,8 @@ export default function LibraryPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-serif font-bold text-orange-600">Library</h1>
-          <p className="text-orange-500/60 mt-2 font-serif">Loading articles...</p>
+          <h1 className="text-3xl font-bold text-orange-600">Library</h1>
+          <p className="text-orange-500/60 mt-2">Loading articles...</p>
         </header>
       </div>
     );
@@ -116,8 +116,8 @@ export default function LibraryPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-serif font-bold text-orange-600">Library</h1>
-          <p className="text-orange-500/60 mt-2 font-serif">Error: {error}</p>
+          <h1 className="text-3xl font-bold text-orange-600">Library</h1>
+          <p className="text-orange-500/60 mt-2">Error: {error}</p>
         </header>
       </div>
     );
@@ -127,8 +127,8 @@ export default function LibraryPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-8">
         <header className="mb-12 text-center">
-          <h1 className="text-4xl font-serif font-bold text-orange-600 mb-3">Library</h1>
-          <p className="text-orange-500/60 text-lg font-serif">Curated collection of rSearch-powered insights</p>
+          <h1 className="text-4xl font-bold text-orange-600 mb-3">Library</h1>
+          <p className="text-orange-500/60 text-lg">Curated collection of rSearch-powered insights</p>
         </header>
 
         {searchResults.length > 0 ? (
@@ -140,17 +140,17 @@ export default function LibraryPage() {
                 onClick={() => handleCardClick(item)}
               >
                 <CardContent className="p-6">
-                  <div className="text-2xl font-serif font-medium text-orange-700 mb-4 hover:text-orange-600 transition-colors leading-snug">
+                  <div className="text-2xl font-serif font-medium text-orange-700 mb-2 hover:text-orange-600 transition-colors leading-snug">
                     {item.searchTerm}
                   </div>
-                  <div className="text-base text-orange-600/90 prose prose-orange prose-sm mb-8 line-clamp-6 leading-relaxed">
+                  <div className="text-base text-orange-600/90 prose prose-orange prose-sm mb-2 line-clamp-6 leading-relaxed">
                     <Markdown
                       components={{
                         h1: ({...props}) => (
                           <h1 {...props} className="text-2xl font-bold text-orange-600 mb-4" />
                         ),
                         h2: ({...props}) => (
-                          <h2 {...props} className="text-xl font-bold text-orange-600 mt-6 mb-3" />
+                          <h2 {...props} className="text-xl font-bold text-orange-600 mt-4 mb-3" />
                         ),
                         h3: ({...props}) => (
                           <h3 {...props} className="text-lg font-bold text-orange-600 mt-4 mb-2" />
