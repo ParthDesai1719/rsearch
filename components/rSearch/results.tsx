@@ -1,6 +1,26 @@
 'use client';
 
+import { useState } from 'react';
+import type { ImgHTMLAttributes } from 'react';
 import Markdown from 'react-markdown';
+
+// Image component with error handling
+const ImageWithFallback = ({ ...props }: ImgHTMLAttributes<HTMLImageElement>) => {
+  const [hasError, setHasError] = useState(false);
+  
+  if (hasError) {
+    return null; // Don't render anything if image failed to load
+  }
+
+  return (
+    <img 
+      {...props} 
+      alt={props.alt || ''} 
+      className="w-full h-auto rounded-lg"
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 interface ResultsProps {
   isAiLoading: boolean;
@@ -98,9 +118,7 @@ export default function Results({
                     td: ({...props}) => (
                       <td {...props} className="px-6 py-4 text-sm text-gray-700 whitespace-normal" />
                     ),
-                    img: ({...props}) => (
-                      <img {...props} alt={props.alt || ''} className="w-full h-auto rounded-lg" />
-                    ),
+                    img: ImageWithFallback,
                     p: ({children, ...props}) => {
                       // Get text content from React children
                       const content = Array.isArray(children) 

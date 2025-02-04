@@ -1,13 +1,7 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
 import ArticleContent from '@/components/article-content';
 import { notFound } from 'next/navigation';
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+import { supabase } from '@/lib/supabaseClient';
 
 // Generate static params for all published articles
 export async function generateStaticParams() {
@@ -23,19 +17,34 @@ export async function generateStaticParams() {
 
 // Helper function to extract search params and fetch data
 async function getArticleDataFromSlug(slug: string) {
-  const parts = decodeURIComponent(slug).split('-');
-  const mode = parts.pop() || '';
-  const searchTerm = parts.join(' ');
+  try {
+    // First try to get all published articles
+    const { data: articles } = await supabase
+      .from('search_results')
+      .select('*')
+      .eq('publishArticle', true);
 
-  const { data: article } = await supabase
-    .from('search_results')
-    .select('*')
-    .eq('searchTerm', searchTerm)
-    .eq('mode', mode)
-    .eq('publishArticle', true)
-    .single();
-  
-  return { article, searchTerm, mode };
+    if (!articles) return { article: null, searchTerm: '', mode: '' };
+
+    // Find the matching article by comparing generated slugs
+    const article = articles.find(article => {
+      const generatedSlug = `${article.searchTerm}-${article.mode}`
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+      return encodeURIComponent(generatedSlug) === slug;
+    });
+
+    if (!article) return { article: null, searchTerm: '', mode: '' };
+
+    return { 
+      article, 
+      searchTerm: article.searchTerm,
+      mode: article.mode 
+    };
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    return { article: null, searchTerm: '', mode: '' };
+  }
 }
 
 // Generate metadata for each article
