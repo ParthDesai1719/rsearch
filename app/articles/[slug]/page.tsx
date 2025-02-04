@@ -59,13 +59,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  // Extract first paragraph for description
-  const firstParagraph = article.aiResponse
+  // Clean up markdown and extract first paragraph for description
+  const cleanDescription = article.aiResponse
     .split('\n')
-    .find((p: string) => p.trim().length > 0)
+    .map((line: string) => line.replace(/^#+\s+/, '')) // Remove markdown headings
+    .find((p: string) => p.trim().length > 0 && !p.startsWith('!'))
     ?.slice(0, 200);
   
-  const description = firstParagraph ? `${firstParagraph}...` : article.searchTerm;
+  const description = cleanDescription ? `${cleanDescription}...` : article.searchTerm;
+
+  // Get base URL for OG image
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const ogImageUrl = `${baseUrl}/api/og/article?title=${encodeURIComponent(article.searchTerm)}`;
 
   return {
     title: article.searchTerm,
@@ -77,11 +82,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       publishedTime: article.createDate,
       modifiedTime: article.createDate,
       authors: ['rSearch'],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: article.searchTerm,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: article.searchTerm,
       description,
+      images: [ogImageUrl],
     },
   };
 }
