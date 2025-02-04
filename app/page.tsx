@@ -188,11 +188,13 @@ export default function Home() {
                     variant="ghost"
                     size="sm"
                     onClick={handleQueryRefinementToggle}
-                    className={`text-orange-500 hover:bg-orange-100 hover:text-orange-700 flex gap-2 border border-orange-200/50 ${
-                      enableQueryRefinement ? 'bg-orange-50 border-orange-300' : ''
+                    className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
+                      enableQueryRefinement 
+                        ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white' 
+                        : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
                     }`}
                   >
-                    <Wand2 className="h-4 w-4" />
+                    <Wand2 className={`h-4 w-4 ${enableQueryRefinement ? 'text-white' : ''}`} />
                     Improve Query
                   </Button>
                   {isDesktop ? (
@@ -201,7 +203,7 @@ export default function Home() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-orange-500 hover:bg-orange-100 hover:text-orange-700 flex gap-2 border border-orange-200/50"
+                          className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}
                         >
                           <Zap className="h-4 w-4" />
                           {!isDropdownOpen && searchMode 
@@ -236,7 +238,7 @@ export default function Home() {
                   ) : (
                     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                       <DrawerTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-orange-500 hover:bg-orange-100 hover:text-orange-700 flex gap-2 bg-orange-50/80 border border-orange-200/50">
+                        <Button variant="ghost" size="sm" className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}>
                           <Zap className="h-4 w-4" />
                           {searchMode 
                             ? searchModes.find(mode => mode.id === searchMode)?.label 
