@@ -3,8 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, ChevronDown, Wand2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Settings, Search, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
@@ -55,8 +54,6 @@ export default function SettingsPage() {
   const [selectedSearchProvider, setSelectedSearchProvider] = useState("serper");
   const [autoExpandSections, setAutoExpandSections] = useState(true);
   const [enableQueryRefinement, setEnableQueryRefinement] = useState(true);
-  const [isSaved, setIsSaved] = useState(false);
-
   // Load saved settings on mount
   useEffect(() => {
     const savedSettings = localStorage.getItem("rSearch_settings");
@@ -78,9 +75,6 @@ export default function SettingsPage() {
       enableQueryRefinement
     };
     localStorage.setItem("rSearch_settings", JSON.stringify(settings));
-    setIsSaved(true);
-    const timeout = setTimeout(() => setIsSaved(false), 2000);
-    return () => clearTimeout(timeout);
   }, [selectedAIProvider, selectedSearchProvider, autoExpandSections, enableQueryRefinement]);
 
   return (
