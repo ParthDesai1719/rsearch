@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
 import Markdown from 'react-markdown';
-
 // Image component with error handling
 const ImageWithFallback = ({ ...props }: ImgHTMLAttributes<HTMLImageElement>) => {
   const [hasError, setHasError] = useState(false);
@@ -16,7 +15,7 @@ const ImageWithFallback = ({ ...props }: ImgHTMLAttributes<HTMLImageElement>) =>
     <img 
       {...props} 
       alt={props.alt || ''} 
-      className="w-full h-auto rounded-lg"
+      className="rounded-lg mx-auto" // Removed w-full h-auto to preserve native dimensions
       onError={() => setHasError(true)}
     />
   );
@@ -211,7 +210,7 @@ export default function Results({
                       <strong {...props} className="font-bold text-orange-600" />
                     ),
                     em: ({...props}) => (
-                      <em {...props} className="italic text-orange-600/90" />
+                      <em {...props} className="italic text-orange-600/90 text-center font-semibold block" />
                     ),
                     code: ({...props}) => (
                       <code {...props} className="bg-orange-50 text-orange-600 rounded px-1.5 py-0.5 text-sm font-mono" />
