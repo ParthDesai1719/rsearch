@@ -210,7 +210,7 @@ export default function Results({
                       <strong {...props} className="font-bold text-orange-600" />
                     ),
                     em: ({...props}) => (
-                      <em {...props} className="italic text-orange-600/90 text-center font-semibold block" />
+                      <em {...props} className="italic text-orange-600/90 font-semibold" />
                     ),
                     code: ({...props}) => (
                       <code {...props} className="bg-orange-50 text-orange-600 rounded px-1.5 py-0.5 text-sm font-mono" />
