@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, ChevronDown } from "lucide-react";
+import { Settings, Search, ChevronDown, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
@@ -54,29 +54,34 @@ export default function SettingsPage() {
   const [selectedAIProvider, setSelectedAIProvider] = useState("deepseek");
   const [selectedSearchProvider, setSelectedSearchProvider] = useState("serper");
   const [autoExpandSections, setAutoExpandSections] = useState(true);
+  const [enableQueryRefinement, setEnableQueryRefinement] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Load saved settings on mount
   useEffect(() => {
-    // Load saved settings on mount
     const savedSettings = localStorage.getItem("rSearch_settings");
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
       setSelectedAIProvider(settings.aiProvider);
       setSelectedSearchProvider(settings.searchProvider);
       setAutoExpandSections(settings.autoExpandSections ?? true);
+      setEnableQueryRefinement(settings.enableQueryRefinement ?? true);
     }
   }, []);
 
-  const handleSave = () => {
+  // Save settings whenever they change
+  useEffect(() => {
     const settings = {
       aiProvider: selectedAIProvider,
       searchProvider: selectedSearchProvider,
-      autoExpandSections
+      autoExpandSections,
+      enableQueryRefinement
     };
     localStorage.setItem("rSearch_settings", JSON.stringify(settings));
     setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
-  };
+    const timeout = setTimeout(() => setIsSaved(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [selectedAIProvider, selectedSearchProvider, autoExpandSections, enableQueryRefinement]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +99,7 @@ export default function SettingsPage() {
                 <CardTitle className=" text-lg">Display Settings</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="auto-expand" className="text-orange-600">
                   Auto-expand result sections
@@ -106,6 +111,21 @@ export default function SettingsPage() {
                   id="auto-expand"
                   checked={autoExpandSections}
                   onCheckedChange={setAutoExpandSections}
+                  className="data-[state=checked]:bg-orange-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="query-refinement" className="text-orange-600">
+                  Enable query refinement
+                  <p className="text-sm text-orange-500/80">
+                    Allow AI to improve your search queries for better results
+                  </p>
+                </Label>
+                <Switch
+                  id="query-refinement"
+                  checked={enableQueryRefinement}
+                  onCheckedChange={setEnableQueryRefinement}
                   className="data-[state=checked]:bg-orange-500"
                 />
               </div>
@@ -187,15 +207,6 @@ export default function SettingsPage() {
               </RadioGroup>
             </CardContent>
           </Card>
-
-          <div className="flex justify-center">
-            <Button
-              onClick={handleSave}
-              className="bg-orange-600 hover:bg-orange-500 text-white"
-            >
-              {isSaved ? "Saved!" : "Save Settings"}
-            </Button>
-          </div>
         </div>
       </div>
     </div>
