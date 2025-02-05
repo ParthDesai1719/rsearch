@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabaseClient';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   try {
     // Fetch all published articles
@@ -23,8 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return {
         url: `${baseUrl}/articles/${encodeURIComponent(slug)}`,
         lastModified: new Date(article.createDate),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
       };
     }) || [];
 
