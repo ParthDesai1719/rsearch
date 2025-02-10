@@ -42,6 +42,11 @@ Try rSearch* for free here - [rsearch.app](https://rsearch.app)
 
 - **Multiple Search Modes**: Search across diverse content categories:
   - **Web Search**: Broad and efficient web search capability
+  - **Deep Research**: Advanced recursive exploration with configurable depth and breadth
+    - BFS/DFS search strategies
+    - Configurable depth (1-5) and breadth (1-5)
+    - Real-time progress tracking
+    - Automatic follow-up question generation
   - **Images**: Visual content search
   - **Videos**: Video content discovery
   - **News**: Latest headlines and articles
@@ -49,6 +54,14 @@ Try rSearch* for free here - [rsearch.app](https://rsearch.app)
   - **Shopping**: Product information and price comparisons
   - **Scholar**: Academic content and research papers
   - **Patents**: Patent database search
+
+- **Deep Research Capabilities**:
+  - **Configurable Search Parameters**: Control depth and breadth of research
+  - **Search Strategies**: Choose between Breadth-First (BFS) or Depth-First (DFS) search
+  - **Intermediate Analysis**: View research progress and intermediate findings
+  - **Recursive Exploration**: Automatically generate and follow up on research directions
+  - **Comprehensive Reports**: Generate detailed markdown reports of findings
+  - **Source Tracking**: Keep track of all sources and their relationships
 
 - **Modern UI Components**:
   - Responsive sidebar navigation
@@ -132,6 +145,10 @@ Deploying **rSearch** is simple and fast with Vercel's one-click deployment opti
 
     # Landing Page Copy Text
     NEXT_PUBLIC_LANDING_PAGE_COPY_TEXT="AI-powered search with advanced reasoning capabilities"
+
+    # Supabase Configuration
+    NEXT_PUBLIC_SUPABASE_URL=
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=
     ```
 
 5. Start the development server:
@@ -158,7 +175,8 @@ rsearch/
 │   ├── api/             # API routes
 │   ├── layout.tsx       # Root layout
 │   ├── page.tsx         # Home page
-│   └── rSearch/          # Search page
+│   ├── rsearch/         # Regular search page
+│   └── deeprsearch/     # Deep research page
 ├── components/          # React components
 │   ├── rSearch/        # Search-specific components
 │   └── ui/             # Reusable ShadCN UI components

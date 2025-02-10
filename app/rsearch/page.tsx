@@ -11,14 +11,29 @@ import Results from '@/components/rSearch/results';
 import Sources from '@/components/rSearch/sources';
 import { getWebsiteName } from '@/lib/utils';
 import SourcesSidebar from '@/components/rSearch/sources-sidebar';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+
+// Type guard to check if a value is a SearchResult array
+function isSearchResultArray(value: unknown): value is SearchResult[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && item !== null && 'title' in item && 'link' in item
+  );
+}
 
 function SearchPageContent() {
+  const router = useRouter();
   // 1. Search params
   const params = useSearchParams();
   const searchTerm = params.get('q') || '';
   const mode = (params.get('mode') || '') as SearchSource;
   const shouldRefine = params.get('refine') !== 'false'; // Default to true if not specified
+
+  // Redirect to deep search page if mode is 'deep'
+  useEffect(() => {
+    if (mode === 'deep' as SearchSource) {
+      router.push(`/deeprsearch/?q=${encodeURIComponent(searchTerm)}`);
+    }
+  }, [mode, searchTerm, router]);
 
   // 2. Query refinement state
   const [isRefining, setIsRefining] = useState(true);
@@ -60,11 +75,12 @@ function SearchPageContent() {
     peopleAlsoAsk?: { question: string; snippet: string; link: string; }[];
     relatedSearches?: { query: string; }[];
   } | null>(null);
+
   useEffect(() => {
     let isMounted = true;
 
     const fetchRefinedQuery = async () => {
-      if (!searchTerm) return;
+      if (!searchTerm || mode === 'deep' as SearchSource) return;
 
       try {
         // Step 2: Refine Query (if enabled)
@@ -107,7 +123,7 @@ function SearchPageContent() {
     let isMounted = true;
 
     const fetchSearchResults = async () => {
-      if (!searchTerm) return;
+      if (!searchTerm || mode === 'deep' as SearchSource) return;
 
       try {
         setIsLoadingSources(true);
@@ -131,27 +147,28 @@ function SearchPageContent() {
         if (isMounted) {
           // Handle different response formats
           if (mode === 'news') {
-            const newsItems = Array.isArray(searchData) ? searchData : searchData.news || [];
-            setSources(newsItems);
+            const newsItems = searchData.news || [];
+            setSources(isSearchResultArray(newsItems) ? newsItems : []);
           } else if (mode === 'web') {
             // For web mode, use organic results
-            setSources(searchData.organic || []);
+            const organicResults = searchData.organic || [];
+            setSources(isSearchResultArray(organicResults) ? organicResults : []);
             setKnowledgeGraph(searchData.knowledgeGraph);
           } else if (mode === 'shopping') {
             // For shopping mode, use shopping results
-            const shoppingItems = Array.isArray(searchData) ? searchData : searchData.shopping || [];
-            setSources(shoppingItems);
+            const shoppingItems = searchData.shopping || [];
+            setSources(isSearchResultArray(shoppingItems) ? shoppingItems : []);
           } else if (mode === 'scholar' || mode === 'patents') {
             // For scholar/patents mode, use organic results
-            if (Array.isArray(searchData)) {
-              setSources(searchData);
-            } else if (searchData.organic) {
+            if (searchData.organic && isSearchResultArray(searchData.organic)) {
               setSources(searchData.organic);
             } else {
               setSources([]);
             }
-          } else {
-            setSources(searchData[mode] || []);
+          } else if (mode !== 'deep' as SearchSource) {
+            // Handle all other modes except 'deep'
+            const results = searchData[mode as keyof SerperResponse];
+            setSources(isSearchResultArray(results) ? results : []);
           }
           setIsLoadingSources(false);
         }
@@ -177,7 +194,7 @@ function SearchPageContent() {
     let isMounted = true;
 
     const fetchAiResponse = async () => {
-      if (!sources.length || !searchTerm) return;
+      if (!sources.length || !searchTerm || mode === 'deep' as SearchSource) return;
 
       try {
         setIsAiLoading(true);
@@ -186,59 +203,59 @@ function SearchPageContent() {
         setAiResponse('');
         setReasoningContent('');
 
-            const aiResponse = await fetch('/api/rsearch', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                searchTerm,
-                searchResults: {
-                  organic: sources,
-                  knowledgeGraph
-                },
-                mode,
-                refinedQuery: refinedQuery ? {
-                  query: refinedQuery.query,
-                  explanation: refinedQuery.explanation
-                } : undefined
-              }),
-            });
+        const aiResponse = await fetch('/api/rsearch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            searchTerm,
+            searchResults: {
+              organic: sources,
+              knowledgeGraph
+            },
+            mode,
+            refinedQuery: refinedQuery ? {
+              query: refinedQuery.query,
+              explanation: refinedQuery.explanation
+            } : undefined
+          }),
+        });
 
-            if (!aiResponse.ok) throw new Error('Failed to generate AI response');
-            if (!aiResponse.body) throw new Error('No response body');
+        if (!aiResponse.ok) throw new Error('Failed to generate AI response');
+        if (!aiResponse.body) throw new Error('No response body');
 
-            const reader = aiResponse.body.getReader();
-            const decoder = new TextDecoder();
+        const reader = aiResponse.body.getReader();
+        const decoder = new TextDecoder();
 
-            while (true) {
-              const { done, value } = await reader.read();
-              
-              if (done) {
-                if (isMounted) {
-                  setIsAiLoading(false);
-                  setIsAiComplete(true);
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            if (isMounted) {
+              setIsAiLoading(false);
+              setIsAiComplete(true);
+            }
+            break;
+          }
+
+          const rawChunk = decoder.decode(value, { stream: true });
+          // Each chunk is a JSON string followed by newline
+          const chunks = rawChunk.split('\n').filter(Boolean);
+          
+          if (isMounted) {
+            for (const chunk of chunks) {
+              try {
+                const parsed = JSON.parse(chunk);
+                if (parsed.reasoning_content) {
+                  setReasoningContent(prev => prev + parsed.reasoning_content);
+                } else if (parsed.content) {
+                  setAiResponse(prev => prev + parsed.content);
                 }
-                break;
-              }
-
-              const rawChunk = decoder.decode(value, { stream: true });
-              // Each chunk is a JSON string followed by newline
-              const chunks = rawChunk.split('\n').filter(Boolean);
-              
-              if (isMounted) {
-                for (const chunk of chunks) {
-                  try {
-                    const parsed = JSON.parse(chunk);
-                    if (parsed.reasoning_content) {
-                      setReasoningContent(prev => prev + parsed.reasoning_content);
-                    } else if (parsed.content) {
-                      setAiResponse(prev => prev + parsed.content);
-                    }
-                  } catch (err) {
-                    console.error('Error parsing chunk:', err);
-                  }
-                }
+              } catch (err) {
+                console.error('Error parsing chunk:', err);
               }
             }
+          }
+        }
       } catch (err) {
         console.error('AI Error:', err);
         if (isMounted) {
@@ -256,7 +273,7 @@ function SearchPageContent() {
   // Save search results to Supabase when AI response is complete
   useEffect(() => {
     const saveSearchResults = async () => {
-      if (!isAiComplete || !searchTerm || !aiResponse) return;
+      if (!isAiComplete || !searchTerm || !aiResponse || mode === 'deep' as SearchSource) return;
 
       try {
         const { error } = await supabase
@@ -292,6 +309,11 @@ function SearchPageContent() {
   }, [isAiComplete, searchTerm, mode, refinedQuery, sources, knowledgeGraph, reasoningContent, aiResponse, rawSources, isSourcesExpanded, isRefinedQueryExpanded, isThinkingExpanded, isResultsExpanded]);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Don't render anything if mode is 'deep' - will redirect
+  if (mode === 'deep' as SearchSource) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen">

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,9 @@ import {
   Search, Globe, BookText, Video, 
   Zap, ShoppingBag, MapPin, 
   Newspaper, GraduationCap, Lightbulb,
-  Wand2
+  Wand2, Network
 } from "lucide-react";
-import { SearchSource } from "@/types/search";
+import type { SearchSource } from "@/types/search";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +38,7 @@ export default function Home() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [enableQueryRefinement, setEnableQueryRefinement] = useState(true);
+  const [enableDeepResearch, setEnableDeepResearch] = useState(false);
 
   // Initialize default settings if they don't exist
   useEffect(() => {
@@ -47,16 +48,18 @@ export default function Home() {
         aiProvider: "deepseek",
         searchProvider: "serper",
         autoExpandSections: true,
-        enableQueryRefinement: true
+        enableQueryRefinement: true,
+        enableDeepResearch: false
       };
       localStorage.setItem("rSearch_settings", JSON.stringify(defaultSettings));
     } else {
       const settings = JSON.parse(savedSettings);
       setEnableQueryRefinement(settings.enableQueryRefinement ?? true);
+      setEnableDeepResearch(settings.enableDeepResearch ?? false);
     }
   }, []);
 
-  // Update settings when toggle changes
+  // Update settings when toggles change
   const handleQueryRefinementToggle = () => {
     const newValue = !enableQueryRefinement;
     setEnableQueryRefinement(newValue);
@@ -64,6 +67,24 @@ export default function Home() {
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
       settings.enableQueryRefinement = newValue;
+      localStorage.setItem("rSearch_settings", JSON.stringify(settings));
+    }
+  };
+
+  const handleDeepResearchToggle = () => {
+    const newValue = !enableDeepResearch;
+    setEnableDeepResearch(newValue);
+    // When enabling deep research, disable query refinement
+    if (newValue) {
+      setEnableQueryRefinement(false);
+    }
+    const savedSettings = localStorage.getItem("rSearch_settings");
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      settings.enableDeepResearch = newValue;
+      if (newValue) {
+        settings.enableQueryRefinement = false;
+      }
       localStorage.setItem("rSearch_settings", JSON.stringify(settings));
     }
   };
@@ -122,7 +143,11 @@ export default function Home() {
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
     
-    router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}&refine=${enableQueryRefinement}`);
+    if (enableDeepResearch) {
+      router.push(`/deeprsearch/?q=${encodeURIComponent(searchTerm)}`);
+    } else {
+      router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}&refine=${enableQueryRefinement}`);
+    }
   };
 
   return (
@@ -187,23 +212,38 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleQueryRefinementToggle}
+                    onClick={handleDeepResearchToggle}
                     className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
-                      enableQueryRefinement 
-                        ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white' 
+                      enableDeepResearch
+                        ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white'
                         : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
                     }`}
                   >
-                    <Wand2 className={`h-4 w-4 ${enableQueryRefinement ? 'text-white' : ''}`} />
-                    Improve Query
+                    <Network className={`h-4 w-4 ${enableDeepResearch ? 'text-white' : ''}`} />
+                    Deep Research
                   </Button>
+                  {!enableDeepResearch && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleQueryRefinementToggle}
+                      className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
+                        enableQueryRefinement
+                          ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white'
+                          : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
+                      }`}
+                    >
+                      <Wand2 className={`h-4 w-4 ${enableQueryRefinement ? 'text-white' : ''}`} />
+                      Improve Query
+                    </Button>
+                  )}
                   {isDesktop ? (
                     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} >
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}
+                          className="flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50"
                         >
                           <Zap className="h-4 w-4" />
                           {!isDropdownOpen && searchMode 
@@ -238,7 +278,7 @@ export default function Home() {
                   ) : (
                     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                       <DrawerTrigger asChild>
-                        <Button variant="ghost" size="sm" className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}>
+                        <Button variant="ghost" size="sm" className="flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50">
                           <Zap className="h-4 w-4" />
                           {searchMode 
                             ? searchModes.find(mode => mode.id === searchMode)?.label 
@@ -315,21 +355,21 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium pb-4 border-b border-orange-200/30">
               <Link 
                 href="/terms" 
-                className="text-orange-800/90 hover:text-orange-900 transition-colors  hover:scale-105 transform duration-200"
+                className="text-orange-800/90 hover:text-orange-900 transition-colors hover:scale-105 transform duration-200"
               >
                 Terms
               </Link>
               <span className="hidden md:inline text-orange-400">•</span>
               <Link 
                 href="/privacy" 
-                className="text-orange-800/90 hover:text-orange-900 transition-colors  hover:scale-105 transform duration-200"
+                className="text-orange-800/90 hover:text-orange-900 transition-colors hover:scale-105 transform duration-200"
               >
                 Privacy
               </Link>
               <span className="hidden md:inline text-orange-400">•</span>
               <Link 
                 href="/about" 
-                className="text-orange-800/90 hover:text-orange-900 transition-colors  hover:scale-105 transform duration-200"
+                className="text-orange-800/90 hover:text-orange-900 transition-colors hover:scale-105 transform duration-200"
               >
                 About
               </Link>
@@ -339,14 +379,14 @@ export default function Home() {
             <div className="flex flex-row items-center gap-4 text-sm pt-2">
               <a 
                 href="https://www.x.com/justmalhar/" 
-                className="text-orange-700/90 hover:text-orange-800 transition-colors  hover:scale-105 transform duration-200 whitespace-nowrap hover:bg-orange-100/50 px-3 py-1 rounded-full"
+                className="text-orange-700/90 hover:text-orange-800 transition-colors hover:scale-105 transform duration-200 whitespace-nowrap hover:bg-orange-100/50 px-3 py-1 rounded-full"
               >
                 Made with ❤️ and AI by @justmalhar
               </a>
               <span className="hidden md:inline text-orange-400">•</span>
               <a 
                 href="https://github.com/Justmalhar/rsearch.git" 
-                className="hidden md:flex text-orange-700/90 hover:text-orange-800 transition-colors  hover:scale-105 transform duration-200 items-center gap-2 hover:bg-orange-100/50 px-3 py-1 rounded-full"
+                className="hidden md:flex text-orange-700/90 hover:text-orange-800 transition-colors hover:scale-105 transform duration-200 items-center gap-2 hover:bg-orange-100/50 px-3 py-1 rounded-full"
               >
                 <svg 
                   className="w-4 h-4" 

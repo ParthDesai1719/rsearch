@@ -1,4 +1,4 @@
-export type SearchSource = 'web' | 'images' | 'videos' | 'places' | 'news' | 'shopping' | 'scholar' | 'patents' | 'academic';
+export type SearchSource = 'web' | 'images' | 'videos' | 'places' | 'news' | 'shopping' | 'scholar' | 'patents' | 'academic' | 'deep';
 
 // Base interface for common properties
 interface BaseSearchResult {
