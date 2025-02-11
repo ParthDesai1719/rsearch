@@ -6,7 +6,6 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import Query from '@/components/rSearch/query';
 import Results from '@/components/rSearch/results';
 import { getWebsiteName } from '@/lib/utils';
-import SourcesSidebar from '@/components/rSearch/sources-sidebar';
 import { useSearchParams } from 'next/navigation';
 import ResearchProgress from '@/components/deepRSearch/research-progress';
 
@@ -27,7 +26,6 @@ function DeepSearchPageContent() {
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(true);
   const [isThinkingExpanded, setIsThinkingExpanded] = useState(true);
   const [isResultsExpanded, setIsResultsExpanded] = useState(true);
-  const [showSourcesSidebar] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load saved settings on client side
