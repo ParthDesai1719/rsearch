@@ -196,9 +196,53 @@ export default function Results({
                     ol: ({...props}) => (
                       <ol {...props} className="list-decimal pl-6 mb-4 space-y-2 marker:text-orange-500" />
                     ),
-                    li: ({...props}) => (
-                      <li {...props} className="text-gray-700" />
-                    ),
+                    li: ({children, ...props}) => {
+                      // Function to detect URLs
+                      const urlRegex = /(https?:\/\/[^\s]+)/g;
+                      
+                      // Convert children to string if needed
+                      const content = Array.isArray(children) 
+                        ? children
+                            .map(child => {
+                              if (typeof child === 'string') return child;
+                              if (child && typeof child === 'object' && 'props' in child) {
+                                return child.props.children || '';
+                              }
+                              return '';
+                            })
+                            .join('')
+                        : children?.toString() || '';
+
+                      // If content contains a URL, transform it into a link
+                      if (urlRegex.test(content)) {
+                        const parts = content.split(urlRegex);
+                        const elements = parts.map(part => {
+                          if (urlRegex.test(part)) {
+                            // Create a unique key using URL content
+                            const urlHash = part.split('').reduce((hash, char) => {
+                              return ((hash << 5) - hash) + char.charCodeAt(0) | 0;
+                            }, 0);
+                            
+                            return (
+                              <a 
+                                key={`link-${urlHash}`}
+                                href={part}
+                                className="text-orange-600 hover:text-orange-700 font-medium underline decoration-orange-200 hover:decoration-orange-500 transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {part}
+                              </a>
+                            );
+                          }
+                          return part;
+                        });
+                        return <li {...props} className="text-gray-700">{elements}</li>;
+                      }
+
+                      // Return regular list item if no URLs
+                      return <li {...props} className="text-gray-700">{children}</li>;
+                    },
                     a: ({...props}) => (
                       <a 
                         {...props} 

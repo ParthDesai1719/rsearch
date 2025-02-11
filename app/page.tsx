@@ -6,7 +6,7 @@ import {
   Search, Globe, BookText, Video, 
   Zap, ShoppingBag, MapPin, 
   Newspaper, GraduationCap, Lightbulb,
-  Wand2
+  Wand2, Brain
 } from "lucide-react";
 import { SearchSource } from "@/types/search";
 import {
@@ -38,6 +38,7 @@ export default function Home() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [enableQueryRefinement, setEnableQueryRefinement] = useState(true);
+  const [enableDeepResearch, setEnableDeepResearch] = useState(false);
 
   // Initialize default settings if they don't exist
   useEffect(() => {
@@ -122,11 +123,15 @@ export default function Home() {
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
     
-    router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}&refine=${enableQueryRefinement}`);
+    if (enableDeepResearch) {
+      router.push(`/deeprsearch/?q=${encodeURIComponent(searchTerm)}`);
+    } else {
+      router.push(`/rsearch/?q=${encodeURIComponent(searchTerm)}&mode=${searchMode || 'web'}&refine=${enableQueryRefinement}`);
+    }
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-full">
+    <div className="flex-1 flex flex-col min-h-full w-[100vw]">
       <main className="flex-1 flex flex-col items-center justify-center px-4">
         {/* Logo Section */}
         <div className="flex flex-col items-center space-y-4 mb-8">
@@ -182,97 +187,116 @@ export default function Home() {
               </div>
 
               {/* Controls Row */}
-              <div className="flex items-center justify-between px-2">
+              <div className="flex flex-col md:flex-row items-center justify-between px-2 gap-2">
                 <div className="flex gap-2 items-center">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleQueryRefinementToggle}
+                    onClick={() => setEnableDeepResearch(!enableDeepResearch)}
                     className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
-                      enableQueryRefinement 
+                      enableDeepResearch 
                         ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white' 
                         : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
                     }`}
                   >
-                    <Wand2 className={`h-4 w-4 ${enableQueryRefinement ? 'text-white' : ''}`} />
-                    Improve Query
+                    <Brain className={`h-4 w-4 ${enableDeepResearch ? 'text-white' : ''}`} />
+                    Deep Research
                   </Button>
-                  {isDesktop ? (
-                    <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} >
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}
-                        >
-                          <Zap className="h-4 w-4" />
-                          {!isDropdownOpen && searchMode 
-                            ? searchModes.find(mode => mode.id === searchMode)?.label 
-                            : 'Mode'
-                          }
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-[600px] mt-2 p-4 bg-white border-orange-200" sideOffset={8}>
-                        <div className="grid grid-cols-4 grid-rows-2">
-                          {searchModes.map((mode) => (
-                            <DropdownMenuItem
-                              key={mode.id}
-                              onClick={() => {
-                                setSearchMode(mode.id);
-                                setIsDropdownOpen(false);
-                              }}
-                              className="flex flex-col items-start p-3 cursor-pointer hover:bg-orange-100/80 focus:bg-orange-100/80"
+
+                  {!enableDeepResearch && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleQueryRefinementToggle}
+                        className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
+                          enableQueryRefinement 
+                            ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white' 
+                            : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
+                        }`}
+                      >
+                        <Wand2 className={`h-4 w-4 ${enableQueryRefinement ? 'text-white' : ''}`} />
+                        Improve Query
+                      </Button>
+
+                      {isDesktop ? (
+                        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} >
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}
                             >
-                              <div className="flex items-center gap-3">
-                                <mode.icon className="h-5 w-5 text-orange-600 flex-shrink-0" />
-                                <span className="font-medium text-orange-900">{mode.label}</span>
-                              </div>
-                              <p className="text-xs text-orange-600 leading-relaxed w-full">
-                                {mode.description}
-                              </p>
-                            </DropdownMenuItem>
-                          ))}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                      <DrawerTrigger asChild>
-                        <Button variant="ghost" size="sm" className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}>
-                          <Zap className="h-4 w-4" />
-                          {searchMode 
-                            ? searchModes.find(mode => mode.id === searchMode)?.label 
-                            : 'Mode'
-                          }
-                        </Button>
-                      </DrawerTrigger>
-                      <DrawerContent className="bg-white border-t border-orange-200">
-                        <DrawerHeader>
-                          <DrawerTitle className="text-lg font-medium text-orange-700">
-                            Select Search Mode
-                          </DrawerTitle>
-                        </DrawerHeader>
-                        <div className="p-4 space-y-4">
-                          {searchModes.map((mode) => (
-                            <button
-                              key={mode.id}
-                              type="button"
-                              className="flex items-center gap-3 w-full p-3 hover:bg-orange-100/80 rounded-lg transition-colors"
-                              onClick={() => {
-                                setSearchMode(mode.id);
-                                setIsDrawerOpen(false);
-                              }}
-                            >
-                              <mode.icon className="h-5 w-5 text-orange-600 flex-shrink-0" />
-                              <div className="text-left">
-                                <div className="font-medium text-orange-900">{mode.label}</div>
-                                <div className="text-sm text-orange-600">{mode.description}</div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </DrawerContent>
-                    </Drawer>
+                              <Zap className="h-4 w-4" />
+                              {!isDropdownOpen && searchMode 
+                                ? searchModes.find(mode => mode.id === searchMode)?.label 
+                                : 'Mode'
+                              }
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-[600px] mt-2 p-4 bg-white border-orange-200" sideOffset={8}>
+                            <div className="grid grid-cols-4 grid-rows-2">
+                              {searchModes.map((mode) => (
+                                <DropdownMenuItem
+                                  key={mode.id}
+                                  onClick={() => {
+                                    setSearchMode(mode.id);
+                                    setIsDropdownOpen(false);
+                                  }}
+                                  className="flex flex-col items-start p-3 cursor-pointer hover:bg-orange-100/80 focus:bg-orange-100/80"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <mode.icon className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                                    <span className="font-medium text-orange-900">{mode.label}</span>
+                                  </div>
+                                  <p className="text-xs text-orange-600 leading-relaxed w-full">
+                                    {mode.description}
+                                  </p>
+                                </DropdownMenuItem>
+                              ))}
+                            </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                          <DrawerTrigger asChild>
+                            <Button variant="ghost" size="sm" className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50`}>
+                              <Zap className="h-4 w-4" />
+                              {searchMode 
+                                ? searchModes.find(mode => mode.id === searchMode)?.label 
+                                : 'Mode'
+                              }
+                            </Button>
+                          </DrawerTrigger>
+                          <DrawerContent className="bg-white border-t border-orange-200">
+                            <DrawerHeader>
+                              <DrawerTitle className="text-lg font-medium text-orange-700">
+                                Select Search Mode
+                              </DrawerTitle>
+                            </DrawerHeader>
+                            <div className="p-4 space-y-4">
+                              {searchModes.map((mode) => (
+                                <button
+                                  key={mode.id}
+                                  type="button"
+                                  className="flex items-center gap-3 w-full p-3 hover:bg-orange-100/80 rounded-lg transition-colors"
+                                  onClick={() => {
+                                    setSearchMode(mode.id);
+                                    setIsDrawerOpen(false);
+                                  }}
+                                >
+                                  <mode.icon className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                                  <div className="text-left">
+                                    <div className="font-medium text-orange-900">{mode.label}</div>
+                                    <div className="text-sm text-orange-600">{mode.description}</div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
+                      )}
+                    </>
                   )}
                 </div>
 
