@@ -14,9 +14,16 @@ A cutting-edge research assistant powered by artificial intelligence that harnes
 
 ## Demo
 
+
 ![Demo](https://github.com/Justmalhar/rsearch/raw/main/demo.png)
 
-Try rSearch* for free here - [rsearch.app](https://rsearch.app)
+🔍 **Try rSearch for free** → [rsearch.app](https://rsearch.app) (Points to Beta branch)
+
+🚀 **Get the latest features**: Clone the **beta** branch from github:
+
+```bash
+git clone -b beta https://github.com/Justmalhar/rsearch.git
+```
 
 ## Overview
 
