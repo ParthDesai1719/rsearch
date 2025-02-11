@@ -3,6 +3,28 @@ import ArticleContent from '@/components/article-content';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
+// Helper function to generate a short hash
+function generateHash(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36).substring(0, 6);
+}
+
+// Helper function to generate a slug
+function generateSlug(searchTerm: string, mode: string) {
+  // Take first 50 chars of search term, convert to lowercase, replace spaces with hyphens
+  const baseSlug = searchTerm.slice(0, 50).toLowerCase().replace(/\s+/g, '-');
+  // Remove special characters
+  const cleanSlug = baseSlug.replace(/[^a-z0-9-]/g, '');
+  // Add hash for uniqueness
+  const hash = generateHash(searchTerm + mode);
+  return `${cleanSlug}-${hash}`;
+}
+
 // Generate static params for all published articles
 export async function generateStaticParams() {
   const { data: articles } = await supabase
@@ -11,14 +33,13 @@ export async function generateStaticParams() {
     .eq('publishArticle', true);
 
   return articles?.map((article) => ({
-    slug: encodeURIComponent(`${article.searchTerm}-${article.mode}`.toLowerCase().replace(/\s+/g, '-')),
+    slug: generateSlug(article.searchTerm, article.mode),
   })) || [];
 }
 
 // Helper function to extract search params and fetch data
 async function getArticleDataFromSlug(slug: string) {
   try {
-    // First try to get all published articles
     const { data: articles } = await supabase
       .from('search_results')
       .select('*')
@@ -27,12 +48,9 @@ async function getArticleDataFromSlug(slug: string) {
     if (!articles) return { article: null, searchTerm: '', mode: '' };
 
     // Find the matching article by comparing generated slugs
-    const article = articles.find(article => {
-      const generatedSlug = `${article.searchTerm}-${article.mode}`
-        .toLowerCase()
-        .replace(/\s+/g, '-');
-      return encodeURIComponent(generatedSlug) === slug;
-    });
+    const article = articles.find(article => 
+      generateSlug(article.searchTerm, article.mode) === slug
+    );
 
     if (!article) return { article: null, searchTerm: '', mode: '' };
 
