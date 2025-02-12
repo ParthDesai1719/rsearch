@@ -193,7 +193,7 @@ export default function Home() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setEnableDeepResearch(!enableDeepResearch)}
-                    className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 ${
+                    className={`flex gap-2 border transition-colors shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hidden ${
                       enableDeepResearch 
                         ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500 hover:text-white' 
                         : 'text-orange-500 hover:bg-orange-100 hover:text-orange-700 border-orange-200/50'
