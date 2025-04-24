@@ -45,7 +45,7 @@ export function Sidebar({ className, isMobile }: SidebarProps) {
 
         <Link 
           href="/library" 
-          className="flex flex-col items-center gap-2 p-3 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+          className="flex hidden flex-col items-center gap-2 p-3 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
         >
           <BookText className="h-6 w-6" />
           <span className="text-xs font-medium">Library</span>
