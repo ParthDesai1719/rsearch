@@ -7,7 +7,7 @@ import type {
   NewsSearchResult,
   ShoppingSearchResult
 } from '@/types/search';
-import { rSearchPrompt } from '@/lib/prompts';
+import { refineSearchQueryPrompt, rSearchAnswerPrompt } from '@/lib/prompts';
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_AI_PROVIDER_API_KEY,
@@ -143,7 +143,7 @@ ${video.date ? `Date: ${video.date}\n` : ''}${video.duration ? `Duration: ${vide
       searchContext += `### Search Context\nQuery: ${searchTerm}\nSearch Mode: ${mode}\n\n`;
     }
 
-    const prompt = rSearchPrompt(searchTerm, searchContext + context, currentDate);
+    const prompt = rSearchAnswerPrompt(searchTerm, searchContext + context, currentDate);
 
     const model = process.env.NEXT_PUBLIC_AI_REASONING_MODEL;
 

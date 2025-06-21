@@ -1,4 +1,4 @@
-import { refineSearchQueryPrompt } from '@/lib/prompts';
+import { refineSearchQueryPrompt} from '@/lib/prompts';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
