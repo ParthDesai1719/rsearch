@@ -64,7 +64,6 @@ export default function DeepResearchPage() {
                 const urlMatches = parsed.content.match(/https?:\/\/[\w.-]+(?:\.[\w.-]+)+(?:[\/\w .-]*)*/g);
                 if (urlMatches) {
                   urlMatches.forEach((url: string) => visitedUrls.add(url));
-
                 }
               }
             } catch (err) {
@@ -120,9 +119,9 @@ export default function DeepResearchPage() {
               {steps.map((label, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300
-                    ${index < step ? 'bg-orange-500' : 'bg-orange-100'}
-                    ${index === step ? 'animate-pulse ring-2 ring-orange-400' : ''}`}>
-                    {index < step ? (
+                    ${index < step || (!loading && index === step) ? 'bg-orange-500' : 'bg-orange-100'}
+                    ${index === step && loading ? 'animate-pulse ring-2 ring-orange-400' : ''}`}>
+                    {(index < step || (!loading && index === step)) ? (
                       <CheckCircle className="text-white w-4 h-4" />
                     ) : (
                       <span className="block w-2 h-2 bg-orange-500 rounded-full" />

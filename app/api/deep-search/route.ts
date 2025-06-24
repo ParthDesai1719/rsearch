@@ -77,8 +77,8 @@ export async function POST(req: Request) {
     const topPages = firecrawlData.pages?.slice(0, 5) || [];
 
     if (!topPages.length) {
-      console.warn('No pages returned from Firecrawl.');
-    }
+  console.warn('⚠ No pages from Firecrawl. Raw response:', JSON.stringify(firecrawlData, null, 2));
+  }
 
     let context = `### Search Context\nOriginal Query: ${searchTerm}\nRefined Query: ${refinedQuery}\nRefinement Explanation: ${explanation}\n\n`;
 
