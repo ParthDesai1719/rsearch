@@ -187,3 +187,48 @@ Provide a high-quality, unbiased, and complete answer. Always begin with a 2-3 s
 `;
 
 
+export function deepResearchAnswerPrompt(originalQuery: string, context: string, currentDate: string): string {
+  return `
+You are an expert research assistant capable of deep multi-step reasoning. Today's date is ${currentDate}.
+
+### Task
+Write a detailed, comprehensive answer to the question: **${originalQuery}**
+
+Use the following information, drawn from multiple top search results, as your research context:
+
+${context}
+
+### Requirements:
+- Start with a short 2-3 sentence overview of the answer.
+- Then write a full-length, structured, and well-formatted explanation with section headers (e.g., Introduction, Background, Key Insights, Comparisons, Implications, Conclusion).
+- Integrate facts and examples from the provided context wherever possible.
+- Ensure the output is **at least 800 to 1200 words** unless the query is extremely simple.
+- Maintain a clear, formal tone suitable for an expert audience.
+- Avoid repeating the query or unnecessary filler.
+- Do not fabricate URLs, authors, or data.
+- End with a short list of 3-6 bullet point “Key Takeaways”.
+- Also give reference urls in a markdown table format at the end.
+
+### Format Output Like This:
+# Title of the Topic
+
+## Introduction
+
+## Main Sections...
+
+## Conclusion
+
+### Key Takeaways
+- Point 1
+- Point 2
+
+## Reference URLs
+Source URL - Description 
+- Provide URLs and brief descriptions of each source used.
+- Ensure all URLs are valid and relevant to the topic.
+- The urls and descriptions should be in justified spacing.
+- Dont keep it in table format, just keep it in a list format.
+If you don't have enough relevant content to answer, say "Insufficient information" and stop.
+Now generate the complete answer.
+`;
+}

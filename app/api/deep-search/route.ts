@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { refineSearchQueryPrompt, rSearchAnswerPrompt } from '@/lib/prompts';
+import { refineSearchQueryPrompt, deepResearchAnswerPrompt } from '@/lib/prompts';
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_AI_PROVIDER_API_KEY!,
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY!}`,
       },
-        body: JSON.stringify({
+      body: JSON.stringify({
         query: refinedQuery
       }),
     });
@@ -77,8 +77,8 @@ export async function POST(req: Request) {
     const topPages = firecrawlData.pages?.slice(0, 5) || [];
 
     if (!topPages.length) {
-  console.warn('⚠ No pages from Firecrawl. Raw response:', JSON.stringify(firecrawlData, null, 2));
-  }
+      console.warn('⚠ No pages from Firecrawl. Raw response:', JSON.stringify(firecrawlData, null, 2));
+    }
 
     let context = `### Search Context\nOriginal Query: ${searchTerm}\nRefined Query: ${refinedQuery}\nRefinement Explanation: ${explanation}\n\n`;
 
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     }
 
     // 🧠 Step 3: Generate Answer using OpenAI
-    const prompt = rSearchAnswerPrompt(searchTerm, context, currentDate);
+    const prompt = deepResearchAnswerPrompt(searchTerm, context, currentDate);
 
     const response = await openai.chat.completions.create({
       model: process.env.NEXT_PUBLIC_AI_REASONING_MODEL!,
