@@ -35,7 +35,6 @@ export async function POST(req: Request) {
 
     const currentDate = new Date().toISOString().split('T')[0];
 
-    // 🔍 Step 1: Refine the query using LLM
     const refinementPrompt = refineSearchQueryPrompt(searchTerm, mode, currentDate);
     const refinementResponse = await openai.chat.completions.create({
       model: process.env.NEXT_PUBLIC_AI_REFINER_MODEL!,
@@ -56,16 +55,13 @@ export async function POST(req: Request) {
     const refinedQuery = refinedQueryText?.trim() || searchTerm;
     const explanation = explanationRaw?.trim() || 'No explanation provided.';
 
-    // 🌐 Step 2: Firecrawl Web Search
     const firecrawlRes = await fetch('https://api.firecrawl.dev/v1/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY!}`,
       },
-      body: JSON.stringify({
-        query: refinedQuery
-      }),
+      body: JSON.stringify({ query: refinedQuery }),
     });
 
     if (!firecrawlRes.ok) {
@@ -76,10 +72,6 @@ export async function POST(req: Request) {
     const firecrawlData: { pages?: FirecrawlPage[] } = await firecrawlRes.json();
     const topPages = firecrawlData.pages?.slice(0, 5) || [];
 
-    if (!topPages.length) {
-      console.warn('⚠ No pages from Firecrawl. Raw response:', JSON.stringify(firecrawlData, null, 2));
-    }
-
     let context = `### Search Context\nOriginal Query: ${searchTerm}\nRefined Query: ${refinedQuery}\nRefinement Explanation: ${explanation}\n\n`;
 
     for (let i = 0; i < topPages.length; i++) {
@@ -87,7 +79,6 @@ export async function POST(req: Request) {
       context += `---\n[${i + 1}] ${page.title || 'Untitled'}\nURL: ${page.url}\n\n${page.rawTextContent?.slice(0, 3000) || 'No content'}\n\n`;
     }
 
-    // 🧠 Step 3: Generate Answer using OpenAI
     const prompt = deepResearchAnswerPrompt(searchTerm, context, currentDate);
 
     const response = await openai.chat.completions.create({

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/ui/logo';
 import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle } from 'lucide-react';
+import Results from '@/components/rSearch/results';
 
 const steps = [
   'Analyzing your query for clarity and intent...',
@@ -25,7 +26,6 @@ export default function DeepResearchPage() {
     learnings: string[];
     visitedUrls: string[];
   }>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!query.trim()) return;
@@ -90,14 +90,6 @@ export default function DeepResearchPage() {
     return () => clearInterval(interval);
   }, [query]);
 
-  const handleCopy = () => {
-    if (result?.answer) {
-      navigator.clipboard.writeText(result.answer);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
-  };
-
   return (
     <div className="flex-1 flex flex-col min-h-full">
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
@@ -114,7 +106,6 @@ export default function DeepResearchPage() {
             <p className="text-orange-700 text-base font-medium text-center">Searching for:</p>
             <p className="text-orange-900 text-lg text-center font-semibold mt-1 mb-4">{query}</p>
 
-            {/* Stepper UI */}
             <div className="mb-6 space-y-3">
               {steps.map((label, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
@@ -132,6 +123,21 @@ export default function DeepResearchPage() {
               ))}
             </div>
 
+            {!loading && result && (
+              <div className="mt-6">
+                <Results 
+                  isAiLoading={false} 
+                  aiResponse={result.answer} 
+                  aiError={null} 
+                  isAiComplete={true} 
+                  searchResults={null} 
+                  mode="deep" 
+                  generateSearchId={() => ''} 
+                  getWebsiteName={(url: string) => new URL(url).hostname} 
+                />
+              </div>
+            )}
+
             {loading && (
               <div className="space-y-2 animate-pulse mt-4">
                 <div className="h-4 bg-orange-100 rounded w-3/4 mx-auto" />
@@ -140,45 +146,6 @@ export default function DeepResearchPage() {
               </div>
             )}
 
-            {!loading && result && (
-              <div className="mt-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-orange-800">Final Answer</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopy}
-                    className="text-orange-500 hover:text-orange-700"
-                  >
-                    <Copy className="w-4 h-4 mr-1" />
-                    {copied ? 'Copied' : 'Copy'}
-                  </Button>
-                </div>
-                <p className="text-orange-900 leading-relaxed text-sm whitespace-pre-wrap">
-                  {result.answer}
-                </p>
-
-                {result.learnings?.length > 0 && (
-                  <div>
-                    <h3 className="text-md font-medium text-orange-700 mb-2">Key Learnings</h3>
-                    <ul className="list-disc list-inside text-sm text-orange-800 space-y-1">
-                      {result.learnings.map((l, i) => <li key={i}>{l}</li>)}
-                    </ul>
-                  </div>
-                )}
-
-                {result.visitedUrls?.length > 0 && (
-                  <div>
-                    <h3 className="text-md font-medium text-orange-700 mt-4 mb-2">Sources</h3>
-                    <ul className="list-disc list-inside text-sm text-orange-700 space-y-1 underline">
-                      {result.visitedUrls.map((url, i) => (
-                        <li key={i}><a href={url} target="_blank" rel="noopener noreferrer">{url}</a></li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </main>
