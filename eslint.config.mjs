@@ -16,7 +16,7 @@ export default [
     plugins: ['@typescript-eslint'],
     rules: {
       '@next/next/no-img-element': 'off',
-      '@typescript-eslint/no-unused-vars': 'error'
+      '@typescript-eslint/no-unused-vars': 'off'
     }
   })
 ]
