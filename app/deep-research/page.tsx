@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/ui/logo';
-import { Button } from '@/components/ui/button';
-import { Copy, CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import Results from '@/components/rSearch/results';
 
 const steps = [
@@ -15,7 +14,7 @@ const steps = [
   'Formulating a clear, insightful response...'
 ];
 
-export default function DeepResearchPage() {
+function DeepResearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
@@ -145,10 +144,17 @@ export default function DeepResearchPage() {
                 <div className="h-4 bg-orange-100 rounded w-2/3 mx-auto" />
               </div>
             )}
-
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DeepResearchPage() {
+  return (
+    <Suspense fallback={<div className="text-orange-600 p-8 text-center">Preparing deep research...</div>}>
+      <DeepResearchContent />
+    </Suspense>
   );
 }
