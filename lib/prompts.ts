@@ -266,17 +266,4 @@ Respond only with a JSON object like this:
 }
 `;
 }
-export function generateSearchIntroPrompt(searchTerm: string): string {
-  return `
-You are an AI assistant helping a user understand what is happening in a deep research process.
 
-The user submitted this query:
-"${searchTerm}"
-
-Your task is to write a short 3-4 line introduction explaining what this query is about and what the research process will aim to uncover or explore. Make it human-readable, neutral, and informative.
-
-Avoid technical jargon. Do not answer the query. Just explain what the research is about and why it's important or interesting.
-
-Respond with a short paragraph only. No list, no title, no JSON.
-`;
-}

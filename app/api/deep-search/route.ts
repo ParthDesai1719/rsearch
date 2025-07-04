@@ -38,7 +38,6 @@ export async function POST(req: Request) {
         const encoder = new TextEncoder();
 
         try {
-          // Step 0: Generate dynamic step messages
           const stepExplainPrompt = generateStepExplanationsPrompt(searchTerm);
           const explainRes = await openai.chat.completions.create({
             model: process.env.NEXT_PUBLIC_AI_REFINER_MODEL!,
@@ -68,7 +67,6 @@ export async function POST(req: Request) {
             stepMessages = {};
           }
 
-          // Step 1: Refinement
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -100,7 +98,6 @@ export async function POST(req: Request) {
           const refinedQuery = refinedQueryText?.trim() || searchTerm;
           const explanation = explanationRaw?.trim() || 'No explanation provided.';
 
-          // Step 2: Firecrawl search
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -137,7 +134,6 @@ export async function POST(req: Request) {
             }\n\n`;
           }
 
-          // Step 3: Analyze insights
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -159,7 +155,6 @@ export async function POST(req: Request) {
             stream: true,
           });
 
-          // Step 4: Stream answer
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -177,7 +172,6 @@ export async function POST(req: Request) {
             }
           }
 
-          // Step 5: Finalize
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
