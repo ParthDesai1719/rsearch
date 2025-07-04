@@ -3,22 +3,16 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/ui/logo';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react'; 
 import Results from '@/components/rSearch/results';
-
-const steps = [
-  'Analyzing your query for clarity and intent...',
-  'Refining the question to generate meaningful sub-queries...',
-  'Searching across multiple sources for the best evidence...',
-  'Extracting and interpreting key insights from results...',
-  'Formulating a clear, insightful response...'
-];
 
 function DeepResearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
   const [step, setStep] = useState(0);
+  const [stepMessages, setStepMessages] = useState<string[]>(Array(5).fill(undefined));
+  const [introText, setIntroText] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<null | {
     answer: string;
@@ -28,10 +22,6 @@ function DeepResearchContent() {
 
   useEffect(() => {
     if (!query.trim()) return;
-
-    const interval = setInterval(() => {
-      setStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 1000);
 
     const fetchResult = async () => {
       try {
@@ -58,6 +48,20 @@ function DeepResearchContent() {
           for (const line of lines) {
             try {
               const parsed = JSON.parse(line);
+
+              if (parsed.type === 'intro' && parsed.text) {
+                setIntroText(parsed.text.trim());
+              }
+
+              if (parsed.step && parsed.message) {
+                setStep(parsed.step);
+                setStepMessages(prev => {
+                  const updated = [...prev];
+                  updated[parsed.step - 1] = parsed.message;
+                  return updated;
+                });
+              }
+
               if (parsed.content) {
                 accumulated += parsed.content;
                 const urlMatches = parsed.content.match(/https?:\/\/[\w.-]+(?:\.[\w.-]+)+(?:[\/\w .-]*)*/g);
@@ -71,7 +75,6 @@ function DeepResearchContent() {
           }
         }
 
-        clearInterval(interval);
         setResult({
           answer: accumulated.trim(),
           learnings: [`This result was generated using advanced reasoning over top search results.`],
@@ -80,13 +83,11 @@ function DeepResearchContent() {
         setLoading(false);
       } catch (err) {
         console.error('Streaming error:', err);
-        clearInterval(interval);
         setLoading(false);
       }
     };
 
     fetchResult();
-    return () => clearInterval(interval);
   }, [query]);
 
   return (
@@ -105,8 +106,22 @@ function DeepResearchContent() {
             <p className="text-orange-700 text-base font-medium text-center">Searching for:</p>
             <p className="text-orange-900 text-lg text-center font-semibold mt-1 mb-4">{query}</p>
 
+            {/* Progress Bar */}
+            <div className="mb-6 w-full bg-orange-100 h-2 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-orange-500 transition-all duration-500 ease-in-out"
+                style={{ width: `${(step / 5) * 100}%` }}
+              />
+            </div>
+
+            {introText && (
+              <div className="bg-orange-50 text-orange-900 border border-orange-200 p-4 rounded-lg mb-4 text-sm whitespace-pre-line">
+                {introText}
+              </div>
+            )}
+
             <div className="mb-6 space-y-3">
-              {steps.map((label, index) => (
+              {Array.from({ length: 5 }).map((_, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300
                     ${index < step || (!loading && index === step) ? 'bg-orange-500' : 'bg-orange-100'}
@@ -117,7 +132,13 @@ function DeepResearchContent() {
                       <span className="block w-2 h-2 bg-orange-500 rounded-full" />
                     )}
                   </div>
-                  <span className={`${index <= step ? 'text-orange-700 font-medium' : 'text-orange-400'}`}>{label}</span>
+                  <span className={`${index <= step ? 'text-orange-700 font-medium' : 'text-orange-400'}`}>
+                    {stepMessages[index] !== undefined
+                      ? stepMessages[index]
+                      : index + 1 < step
+                        ? `Completed step ${index + 1}`
+                        : `Waiting for step ${index + 1}...`}
+                  </span>
                 </div>
               ))}
             </div>

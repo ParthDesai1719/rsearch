@@ -232,3 +232,51 @@ If you don't have enough relevant content to answer, say "Insufficient informati
 Now generate the complete answer.
 `;
 }
+export function generateStepExplanationsPrompt(searchTerm: string): string {
+  return `
+You are a helpful AI assistant.
+
+The user has asked a research question: "${searchTerm}"
+
+You're running a 5-step deep research process. For transparency, the user wants to see what you're doing at each step.
+
+Write a JSON object with five entries. Each value should be a **2–3 line explanation** describing what the AI is doing at that step — in natural, clear, human-like language.
+
+Your tone should be:
+- Transparent and helpful
+- Easy to understand
+- Focused on the task being done
+
+Here are the 5 steps:
+
+1. Refining the query to improve clarity and search relevance
+2. Searching the web for high-quality sources
+3. Extracting and analyzing insights from retrieved content
+4. Synthesizing a detailed answer using reasoning
+5. Finalizing and formatting the response with citations
+
+Respond only with a JSON object like this:
+
+{
+  "1": "Explanation for step 1...",
+  "2": "Explanation for step 2...",
+  "3": "Explanation for step 3...",
+  "4": "Explanation for step 4...",
+  "5": "Explanation for step 5..."
+}
+`;
+}
+export function generateSearchIntroPrompt(searchTerm: string): string {
+  return `
+You are an AI assistant helping a user understand what is happening in a deep research process.
+
+The user submitted this query:
+"${searchTerm}"
+
+Your task is to write a short 3-4 line introduction explaining what this query is about and what the research process will aim to uncover or explore. Make it human-readable, neutral, and informative.
+
+Avoid technical jargon. Do not answer the query. Just explain what the research is about and why it's important or interesting.
+
+Respond with a short paragraph only. No list, no title, no JSON.
+`;
+}
